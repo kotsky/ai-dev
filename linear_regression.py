@@ -22,7 +22,7 @@ def coefficients_optimization(coefficients, features, target, alpha, reg):
 
 def cumulative_sum(coefficients, features, target, alpha, reg, coefficient_idx):
 
-    derivative_part = 1
+    derivative_part = 10
 
 
 def create_coefficients_array(features):
