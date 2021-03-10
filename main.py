@@ -5,7 +5,7 @@ linear regression
 Data is taken from /table
 
 TODO list
-- verify all DataTable methods
+- verify all DataTable methods -> done
 - do plot()
 - integrate it to AI models
 - do UI console interface
@@ -21,7 +21,7 @@ class DataTable:
     DataTable is generated from table-like file in a way,
     that it has the following attributes:
         head - shows all head names of each column
-        table - contains columns in a dict way like
+        table - contains DataColumn object in dict way:
             table: { "Column_name1": DataColumn obj,
                     "Column_name2": DataColumn obj, ... }
         features - list which contains pointers on table,
@@ -30,13 +30,20 @@ class DataTable:
         target - column of control value, desired outcome of our AI model,
             (our y)
 
-    methods to use:
+    Methods to use:
         open_file(file_path)
-        select_feature(feature_name: str) - let user decide which feature to use
-        add_feature([feature_name1, feature_name2, ...]: list of str)
-                    - user is free to add more features
+        activate_feature(feature_name: str) - let user decide which feature to use in training set
+        deactivate_feature(feature_name: str) - let user decide which feature to disable in training set
+        add_new_feature([feature_name1, feature_name2, ...]: list of str, command: optional float)
+                    - user is free to add more features. Combine new feature from presented or
+                    make in power "command" some feature. This command activate new feature to be
+                    used in training set by default.
+                Example:
+                    add_new_feature(["feat1", "feat2"]) -> new feature feat1*feat2 will be created and
+                    added to main table as new column.
+                    add_new_feature(["feat1"], 2) -> new feature = feat1^2
         select_target(target_name) - let user decide which outcome parameter is desired
-        scaling() - do scaling of our table itself
+        scaling() - do scaling -1 <= x <= 1 of our table itself
         plot() - show some figures of target vs features dependencies
 
     """
@@ -61,8 +68,20 @@ class DataTable:
         def __len__(self):
             return len(self.data)
 
-        def __copy__(self):
-            return DataTable.DataColumn(self.data, self.mean, self.max,
+        def __iter__(self):
+            self.count = 0
+            self.end_count = len(self)
+            return self
+
+        def __next__(self):
+            if self.count > self.end_count:
+                raise StopIteration
+            else:
+                self.count += 1
+                return self.count - 1
+
+        def copy(self):
+            return DataTable.DataColumn(self.data.copy(), self.mean, self.max,
                                         self.min, self._is_scaled, self._is_centred)
 
         def reset(self):
@@ -102,6 +121,9 @@ class DataTable:
             for idx in range(len(self)):
                 self.data[idx] = round((self.data[idx] / scaling_coefficient),
                                        DataTable.ROUND_AFTER_COMA)
+            # update min-max-mean
+            self.attribute_calculation()
+            self._is_scaled = True
 
     _data_is_scaled: bool
 
@@ -125,10 +147,13 @@ class DataTable:
             for name in self.head:
                 print(name, end=' ')
             print("")
-            print_pretty = "Its shape is {}x{}".format(len(self.table), len(self.table[0]))
+            print_pretty = "Its shape is {}x{}".format(len(self), len(self.table[self.head[0]]))
         else:
             print_pretty = "There is no table available. Please, upload table."
         return print_pretty
+
+    def __len__(self):
+        return len(self.head)
 
     def open_table(self, file_path):
 
@@ -239,7 +264,8 @@ class DataTable:
                     _validation_check = True
                     new_data = self.table[feature_name]
                     for idx in range(len(new_column_obj)):
-                        new_column_obj.data[idx] *= new_data[idx]
+                        new_column_obj.data[idx] = round((new_column_obj.data[idx] + new_data.data[idx]),
+                                                         DataTable.ROUND_AFTER_COMA)
 
                 new_feature_name += "*" + feature_name if len(new_feature_name) > 0 else feature_name
 
@@ -258,17 +284,28 @@ class DataTable:
             new_feature_name = feature_name + '^' + "({})".format(command)
             new_column_obj = self.table[feature_name].copy()
             for idx in range(len(new_column_obj)):
-                new_column_obj[idx] = pow(new_column_obj[idx], command)
+                new_column_obj.data[idx] = round(pow(new_column_obj.data[idx], command),
+                                                 DataTable.ROUND_AFTER_COMA)
             self._add_feature_helper(new_feature_name, new_column_obj)
 
-    def scaling(self):
-        if self._data_is_scaled is True:
-            return
-        self._data_is_scaled = True
-        for column_name in self.table:
+    def scaling(self, column_name=None):
+        """
+        Does scaling of assigned column or all table.
+        :param column_name: string column name which we want to scale
+        :return: None
+        """
+        if column_name is not None:
             column = self.table[column_name]
             column.scaling()
             print("Column {} was scaled".format(column_name))
+        else:
+            if self._data_is_scaled is True:
+                return
+            self._data_is_scaled = True
+            for column_name in self.table:
+                column = self.table[column_name]
+                column.scaling()
+                print("Column {} was scaled".format(column_name))
 
     def plot(self):
         pass
@@ -312,10 +349,10 @@ class DataTable:
             if user_input[0].lower() == DataTable.YES:
                 self.activate_features(target_name, is_target=True)
 
-    def activate_features(self, feature_name: str, is_target=False):
+    def activate_features(self, feature_name, is_target=False):
         """
         Select feature to be used from self.table for AI.
-        :param feature_name: feature name per table as string
+        :param feature_name: feature name per table as string or list of features string
         :param is_target: are we setting feature or target?
         :return: None
         """
@@ -323,12 +360,17 @@ class DataTable:
         def _validate_feature_name(_name: str, _head: dict):
             return _name in _head
 
+        if type(feature_name) == list:
+            for internal_feature_name in feature_name:
+                self.activate_features(internal_feature_name)
+            return
+
         if _validate_feature_name(feature_name, self.table):
             if is_target is False:
                 self.features[feature_name] = self.table[feature_name]
                 print("Feature {} was added".format(feature_name))
             else:
-                self.target = feature_name
+                self.target = self.table[feature_name]
                 print("Target {} was settled".format(feature_name))
         else:
             proposed_name = helper.check_spelling_helper(feature_name, self.head)
@@ -350,6 +392,8 @@ class DataTable:
         """
         new_column_obj.attribute_calculation()
         self.table[new_feature_name] = new_column_obj
+        self.head.append(new_feature_name)
+        self.features[new_feature_name] = new_column_obj
         print("New created feature {} was added".format(new_feature_name))
         print("This {} feature is added to the list of train set".format(new_feature_name))
         self._data_is_scaled = False
@@ -394,6 +438,16 @@ if __name__ == '__main__':
 
     table = DataTable("test_data.csv")
     print(table)
+    head = table.head
+    table.activate_features([head[0], head[1]])
+    table.activate_features(head[3])
+    table.select_target(head[-1])
+    table.add_new_feature([head[0], head[4]])
+    table.add_new_feature([head[1]], 2)
+    table.deactivate_feature(head[1])
+    table.scaling()
+    print(table)
+
 
     # preprocessing
 
