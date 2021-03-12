@@ -1,4 +1,11 @@
-def levenshtein_distance(str1, str2):
+def levenshtein_distance(str1: str, str2: str) -> int:
+    """
+    Return the minimum edits needs to do to
+    change str1 to str2.
+    :param str1: string
+    :param str2: string
+    :return: min edits
+    """
     matrix = [0]
     for i in range(len(str1)):
         matrix.append(i + 1)
@@ -16,7 +23,14 @@ def levenshtein_distance(str1, str2):
     return matrix[-1][-1]
 
 
-def check_spelling_helper(word: str, set_of_words):
+def check_spelling_helper(word: str, set_of_words) -> str:
+    """
+    Using levenshtein_distance() check which word from
+    set_of_words is the most closest to the given word.
+    :param word: given word as a string
+    :param set_of_words: iterative entity of strings
+    :return: the most closest word in string
+    """
     the_most_right_name_edit = float("inf")
     proposed_name = None
     for reference in set_of_words:
@@ -25,5 +39,3 @@ def check_spelling_helper(word: str, set_of_words):
             the_most_right_name_edit = min_edit
             proposed_name = reference
     return proposed_name
-
-print(round(pow(64, 2/3), 4))
