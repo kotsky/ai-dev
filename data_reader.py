@@ -4,6 +4,8 @@ Custom data structure building for AI training.
 
 See DataTable description.
 
+Author: kotsky
+
 """
 
 import helper_methods as helper
@@ -37,9 +39,9 @@ class DataTable:
         * open_file(file_path)
         * activate_feature(feature_name: str) - let user decide which feature to use in training set
         * deactivate_feature(feature_name: str) - let user decide which feature to disable in training set
-        * add_new_feature([feature_name1, feature_name2, ...]: list of str, command: optional float) -
+        * add_new_feature([feature_name1, feature_name2, ...]: list of str, power: optional float) -
         user is free to add more features. Combine new feature from presented or
-        make in power "command" some feature. This command activate new feature to be
+        make in power "power" some feature. This power activate new feature to be
         used in training set by default.
         Example:
             - add_new_feature(["feat1", "feat2"]) -> new feature feat1*feat2 will be created and
@@ -67,6 +69,8 @@ class DataTable:
         Represent a column of a main data table.
 
         """
+
+        ROUND_AFTER_COMA = 2
 
         def __init__(self, _data, mean=0, _max=float("-inf"),
                      _min=float("inf"), _is_scaled=False,
@@ -121,7 +125,7 @@ class DataTable:
                 self.min = min(self.min, number)
                 self.max = max(self.max, number)
                 self.mean += number
-            self.mean = round((self.mean / len(self)), DataTable.ROUND_AFTER_COMA)
+            self.mean = round((self.mean / len(self)), self.ROUND_AFTER_COMA)
 
         def scaling(self):
             """
@@ -137,7 +141,7 @@ class DataTable:
             self.scaled_value = scaling_coefficient
             for idx in range(len(self)):
                 self.data[idx] = round((self.data[idx] / scaling_coefficient),
-                                       DataTable.ROUND_AFTER_COMA)
+                                       self.ROUND_AFTER_COMA)
             # update min-max-mean
             self.attribute_calculation()
             self._is_scaled = True
@@ -162,9 +166,9 @@ class DataTable:
         self.features = {}
         self.target = {}
         self._data_is_scaled = False
-        self._split_pointers = {DataTable._TRAINING: [[0, 0], False],
-                                DataTable._CV: [[0, 0], False],
-                                DataTable._TESTING: [[0, 0], False]}
+        self._split_pointers = {self._TRAINING: [[0, 0], False],
+                                self._CV: [[0, 0], False],
+                                self._TESTING: [[0, 0], False]}
 
     def __repr__(self):
         if self.head:
@@ -190,7 +194,7 @@ class DataTable:
         Did we split our data on training and test sets?
         :return True if data was split:
         """
-        return self._split_pointers[DataTable._TRAINING][1]
+        return self._split_pointers[self._TRAINING][1]
 
     def copy(self):
         """
@@ -233,7 +237,7 @@ class DataTable:
             :param string: "something\n"
             :return: "something"
             """
-            string = string[:-2]
+            string = string[:-1]
             return string
 
         def _str2float(array_of_strings):
@@ -290,7 +294,7 @@ class DataTable:
         # do mean calculation
         for column_name in self.head:
             column = self.table[column_name]
-            column.mean = round(column.mean / len(column), DataTable.ROUND_AFTER_COMA)
+            column.mean = round(column.mean / len(column), self.ROUND_AFTER_COMA)
 
     def _get_split_pointers(self):
         """
@@ -303,24 +307,24 @@ class DataTable:
             print("Data is not split. Prepare data first.")
             return
 
-        cv_flag = self._split_pointers[DataTable._CV][1]
+        cv_flag = self._split_pointers[self._CV][1]
         if cv_flag is True:
-            set_of_pointers = [self._split_pointers[DataTable._TRAINING][0],
-                               self._split_pointers[DataTable._CV][0],
-                               self._split_pointers[DataTable._TESTING][0]]
+            set_of_pointers = [self._split_pointers[self._TRAINING][0],
+                               self._split_pointers[self._CV][0],
+                               self._split_pointers[self._TESTING][0]]
         else:
-            set_of_pointers = [self._split_pointers[DataTable._TRAINING][0],
-                               self._split_pointers[DataTable._TESTING][0]]
+            set_of_pointers = [self._split_pointers[self._TRAINING][0],
+                               self._split_pointers[self._TESTING][0]]
         return cv_flag, set_of_pointers
 
     def _get_training_pointers(self):
-        return self._split_pointers[DataTable._TRAINING][0] if self._split_pointers[DataTable._TRAINING][1] else -1
+        return self._split_pointers[self._TRAINING][0] if self._split_pointers[self._TRAINING][1] else -1
 
     def _get_cv_pointers(self):
-        return self._split_pointers[DataTable._CV][0] if self._split_pointers[DataTable._CV][1] else -1
+        return self._split_pointers[self._CV][0] if self._split_pointers[self._CV][1] else -1
 
     def _get_testing_pointers(self):
-        return self._split_pointers[DataTable._TESTING][0] if self._split_pointers[DataTable._TESTING][1] else -1
+        return self._split_pointers[self._TESTING][0] if self._split_pointers[self._TESTING][1] else -1
 
     def _generate_data_by_pointers(self, mode=None):
         """
@@ -328,9 +332,9 @@ class DataTable:
         :param mode: training / cv / testing as string
         :return: features set, target set as arrays of data
         """
-        if mode == DataTable._TESTING:
+        if mode == self._TESTING:
             set_of_pointers = self._get_testing_pointers()
-        elif mode == DataTable._CV:
+        elif mode == self._CV:
             set_of_pointers = self._get_cv_pointers()
         else:
             print("Training data is generated by default")
@@ -383,7 +387,7 @@ class DataTable:
         if not self.features or not self.target:
             print("Define training set first. Add features and target")
             return
-        features_label = ["Bias"]
+        features_label = []
         for feature_name in self.features:
             features_label.append(feature_name)
         target_name = self._get_target_name()
@@ -449,7 +453,7 @@ class DataTable:
 
         tr_p_st = 0
         tr_p_end = int(m * training_size)
-        self._split_pointers[DataTable._TRAINING] = [[tr_p_st, tr_p_end], True]
+        self._split_pointers[self._TRAINING] = [[tr_p_st, tr_p_end], True]
 
         ts_p_st = tr_p_end + 1
         ts_p_end = m - 1
@@ -458,10 +462,10 @@ class DataTable:
             cv_part = int(cv_size * m)
             cv_p_st = tr_p_end + 1
             cv_p_end = cv_p_st + cv_part
-            self._split_pointers[DataTable._CV] = [[cv_p_st, cv_p_end], True]
+            self._split_pointers[self._CV] = [[cv_p_st, cv_p_end], True]
             ts_p_st = cv_p_end + 1
 
-        self._split_pointers[DataTable._TESTING] = [[ts_p_st, ts_p_end], True]
+        self._split_pointers[self._TESTING] = [[ts_p_st, ts_p_end], True]
 
         if cv_size is not None:
             print("Data was split as follows: {} training set, {} cross-validation set and {} test set".
@@ -490,13 +494,13 @@ class DataTable:
                 _swap(column_obj.data, random_idx1, random_idx2)
         print("Shuffle was done")
 
-    def add_new_feature(self, features: list, command=None) -> None:
+    def add_new_feature(self, features, power=None) -> None:
         """
         Add new desired feature to use.
-        :param features: list of features from main table, which user might
+        :param features: feature str or list of features from main table, which user might
             want to combine to create a new feature like x3 = x1 * x2,
             where x3 - new feature, x1 and x2 - features from main table
-        :param command: specific command to perform:
+        :param power: specific command to perform:
             if None -> new_feature = features[0] * features[1] * ...
             if 0.5 -> new_feature = sqrt(features[0]) for feature[0] >= 0
             if positive int -> new_feature = pow(features[0], command)
@@ -506,6 +510,9 @@ class DataTable:
         def _validate_feature_name(_name: str, _head: dict):
             return _name in _head
 
+        if type(features) == str:
+            features = [features]
+
         if features is None:
             print("Type features' names in a list format")
             return
@@ -513,13 +520,13 @@ class DataTable:
         new_feature_name = ''
         new_column_obj = None
 
-        if command is None:
+        if power is None:
             _validation_check = False
             for feature_name in features:
                 if not _validate_feature_name(feature_name, self.table):
                     proposed_feature_name = helper.check_spelling_helper(feature_name, self.head)
                     user_input = self.__user_confirmation(feature_name, proposed_feature_name)
-                    if user_input[0].lower() == DataTable._YES:
+                    if user_input[0].lower() == self._YES:
 
                         feature_name = proposed_feature_name
                     else:
@@ -534,7 +541,7 @@ class DataTable:
                     new_data = self.table[feature_name]
                     for idx in range(len(new_column_obj)):
                         new_column_obj.data[idx] = round((new_column_obj.data[idx] + new_data.data[idx]),
-                                                         DataTable.ROUND_AFTER_COMA)
+                                                         self.ROUND_AFTER_COMA)
 
                 new_feature_name += "*" + feature_name if len(new_feature_name) > 0 else feature_name
 
@@ -544,17 +551,17 @@ class DataTable:
                 if _validation_check is False:
                     print("We cannot create same feature as we have in our main table")
                 else:
-                    print("Please, write write command input")
+                    print("Please, write write power input")
         else:
-            if command <= 0:
-                print("Set write command as a positive number")
+            if power <= 0:
+                print("Set write power as a positive number")
                 return
             feature_name = features[0]
-            new_feature_name = feature_name + '^' + "({})".format(command)
+            new_feature_name = feature_name + '^' + "({})".format(power)
             new_column_obj = self.table[feature_name].copy()
             for idx in range(len(new_column_obj)):
-                new_column_obj.data[idx] = round(pow(new_column_obj.data[idx], command),
-                                                 DataTable.ROUND_AFTER_COMA)
+                new_column_obj.data[idx] = round(pow(new_column_obj.data[idx], power),
+                                                 self.ROUND_AFTER_COMA)
             self._add_feature_helper(new_feature_name, new_column_obj)
 
     def max_scaling(self, column_name=None) -> None:
@@ -600,7 +607,7 @@ class DataTable:
                 print("You made a typo mistake. Did you mean {}?".format(proposed_name))
                 print("Type y/n")
                 user_input = input()
-                if user_input[0].lower() == DataTable._YES:
+                if user_input[0].lower() == self._YES:
                     self.deactivate_feature(proposed_name)
             else:
                 print("Nothing was done")
@@ -617,7 +624,7 @@ class DataTable:
         else:
             print("Do you want to replace existed {} target? Enter y/n".format(self.target))
             user_input = input()
-            if user_input[0].lower() == DataTable._YES:
+            if user_input[0].lower() == self._YES:
                 self.activate_features(target_name, is_target=True)
 
     def activate_features(self, feature_name, is_target=False) -> None:
@@ -642,14 +649,14 @@ class DataTable:
                 print("Feature {} was added".format(feature_name))
             else:
                 self.target[feature_name] = self.table[feature_name]
-                print("Target {} was settled".format(feature_name))
+                print("Target {} was added".format(feature_name))
         else:
             proposed_name = helper.check_spelling_helper(feature_name, self.head)
             if proposed_name is not None:
                 print("You made a typo mistake in {}. Did you mean {}?".format(feature_name, proposed_name))
                 print("Type y/n")
                 user_input = input()
-                if user_input[0].lower() == DataTable._YES:
+                if user_input[0].lower() == self._YES:
                     self.activate_features(proposed_name, is_target)
             else:
                 print("There is no table. Upload it before this operation")
@@ -685,7 +692,8 @@ class DataTable:
 
     def __create_data_structure(self, m: int) -> None:
         for name in self.head:
-            self.table[name] = DataTable._DataColumn(m * [0])
+            self.table[name] = self._DataColumn(m * [0])
+            self.table[name].ROUND_AFTER_COMA = self.ROUND_AFTER_COMA
 
     @staticmethod
     def __user_confirmation(word: str, proposed_word: str):
@@ -712,7 +720,7 @@ if __name__ == '__main__':
     table.activate_features(head[3])
     table.select_target(head[-1])
     # table.add_new_feature([head[0], head[4]])
-    # table.add_new_feature([head[1]], 2)
+    table.add_new_feature([head[1]], 2)
     # table.deactivate_feature(head[1])
 
     table.split_data(0.6, 0.2)
@@ -726,8 +734,9 @@ if __name__ == '__main__':
 
     table2 = table.copy()
     table2.max_scaling()
+    table.add_new_feature(head[0], power=0.5)
 
     scaled_training_data = table2.get_training_data()
     training_data = table.get_training_data()
-    print(table.get_labels())
-    print()
+    labels = table.get_labels()
+    print(labels)
