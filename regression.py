@@ -31,6 +31,7 @@ class Regression:
         [1] 2 epoch: ....
         ...
         """
+        logs_path = "logs/"
 
         class LogNode:
             def __init__(self, cost_training_function, cost_test_function,
@@ -253,13 +254,18 @@ class Regression:
             if len(self.__temporary_coefficients) != len(self.coefficients):
                 self.__temporary_coefficients = self.coefficients.copy()
 
+        _mod = 0
         for e in range(self.epoch):
             coefficients_optimization()
-            print("Iteration {} done".format(e + 1))
+            if _mod == self.epoch//4:
+                _mod = 0
+                print("Iteration {} done".format(e + 1))
+            _mod += 1
             # if we want to log it
             if self._log_flag is True:
                 # store data for evaluation
                 self.take_model_snapshot()
+        print("Training is completed with {} iterations".format(self.epoch))
 
         return self.coefficients
 

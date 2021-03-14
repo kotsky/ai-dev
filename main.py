@@ -21,8 +21,8 @@ def column2list(column: list, column_idx: int) -> list:
 
 if __name__ == '__main__':
 
-    main_data_table = dr.DataTable("FuelConsumption.csv")
-    label_data = dr.DataTable("test_data.csv")
+    main_data_table = dr.DataTable("data/FuelConsumption.csv")
+
     head = main_data_table.head
     main_data_table.activate_features("FUELCONSUMPTION_COMB_MPG")
     # for feature in label_data.head:
