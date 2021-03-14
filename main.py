@@ -1,16 +1,37 @@
 import data_reader as dr
 import regression
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+
+def column2list(column: list, column_idx: int) -> list:
+
+    if len(column) <= 1:
+        return column if column else []
+
+    if column_idx >= len(column[0]):
+        return [-1]
+
+    new_column = []
+
+    for line in column:
+        new_column.append(line[column_idx])
+    return new_column
+
 
 if __name__ == '__main__':
 
-    main_data_table = dr.DataTable("test_data.csv")
+    main_data_table = dr.DataTable("FuelConsumption.csv")
+    label_data = dr.DataTable("test_data.csv")
     head = main_data_table.head
-    main_data_table.activate_features(head[0])
-    # for feature in head:
+    main_data_table.activate_features("FUELCONSUMPTION_COMB_MPG")
+    # for feature in label_data.head:
     #     main_data_table.activate_features(feature)
     # main_data_table.deactivate_feature(head[-1])
     main_data_table.select_target(head[-1])
+
+    main_data_table.add_new_feature("FUELCONSUMPTION_COMB_MPG", power=2)
+    main_data_table.max_scaling()
     main_data_table.split_data(0.6, 0.2, shuffle=True)
     training_data = main_data_table.get_training_data()
     cv_data = main_data_table.get_cv_data()
@@ -24,20 +45,57 @@ if __name__ == '__main__':
     regression_model.set_testing_data(test_data[0], test_data[1])
     # regression_model.log_mode()
     regression_model.RANDOM_WEIGHT_INITIALIZATION = 10
-    regression_model.alpha = 0.001
+    regression_model.ROUND_AFTER_COMA = 5
+    regression_model.epoch = 2000
+    regression_model.alpha = 0.2
+    regression_model.regularization = 0.1
     regression_model.create_coefficients_array()
     coeff = regression_model.fit()
     error = regression_model.evaluation(cv_data)
     print("Coefficients {} give error {}".format(coeff, error))
 
     test_features, test_target = test_data
+    training_features, training_target = training_data
     predicted = []
     for test in test_features:
         predicted.append(regression_model.predict(test))
 
-    plt.scatter()
-    plt.plot(test_features, test_target, test_features, predicted)
+    # tr_f = []
+    # for line in training_features:
+    #     tr_f.append(line[0])
+
+    # fig = plt.figure()
+    # ax = Axes3D(fig)
+
+    axis1 = column2list(test_features, 0)
+    axis2 = column2list(test_features, 1)
+
+    # ax.scatter(axis1, axis2, test_target)
+    # plt.scatter(test_features, test_target)
+    # ax.scatter(axis1, axis2, predicted)
+    # plt.show()
+
+    axis = main_data_table.get_column_data("ENGINESIZE")
+
+    # x = generate_axis(1, 12, 0.5)
+    #
+    # y = []
+    # for _x in x:
+    #     y.append(regression_model.coefficients[1]*_x + regression_model.coefficients[0])
+
+    plt.scatter(axis1, test_target)
+    plt.scatter(axis1, predicted)
+    # plt.plot(x, y)
     plt.show()
 
-    # Coefficients [21.56, 77.04] give error 352.15
+    """
+    ...
+    Iteration 1000 done
+    Coefficients [-1.55637, 4.81319, 11.87481, 4.5559, 5.51779, 2.46835, 1.13174] give error 17.65038
+    
+    Iteration 1000 done
+    1.15217 -1.91057 * FUELCONSUMPTION_COMB_MPG + 1.02521 * FUELCONSUMPTION_COMB_MPG^2
+    Coefficients [1.15217, -1.91057, 1.02521] give error 0.0302
+    
+    """
 

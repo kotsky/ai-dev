@@ -10,16 +10,28 @@ Author: kotsky
 """
 import random
 
+INT32_MAX = 2147483646 // 2
+
 
 class Regression:
+    """
+    Regression model based on gradient descent, which comes with standard:
+    * fit()
+    * predict()
+    * set_model_parameters()
+    * set_training_data
+    * set_testing_data
+    * evaluate() - MAE technique
+    """
 
-    class Log:
+    class _Logs:
         """
         Entity to save training process each iteration in a way:
         [0] 1 epoch: ID, Jtr, Jcv, h_power, alpha, reg, coefficients
         [1] 2 epoch: ....
         ...
         """
+
         class LogNode:
             def __init__(self, cost_training_function, cost_test_function,
                          coefficients, alpha, regularization, d, i_d):
@@ -51,8 +63,8 @@ class Regression:
 
         def add_log(self, cost_training_function: float, cost_test_function: float,
                     coefficients: list, alpha: float, regularization: float) -> None:
-            node = Regression.Log.LogNode(cost_training_function, cost_test_function,
-                                          coefficients, alpha, regularization, self._d, len(self))
+            node = Regression._Logs.LogNode(cost_training_function, cost_test_function,
+                                            coefficients, alpha, regularization, self._d, len(self))
             self.training_storage.append(node)
 
         def get_logs(self):
@@ -75,7 +87,7 @@ class Regression:
 
         self.coefficients = []
         self.alpha = 1  # learning rate
-        self.regularization = 0  # regularization value
+        self.regularization = 0  # regularization value: Lasso Regularization
         self.epoch = 1  # number of iteration
 
         self._testing_features_data = [[]]
@@ -116,7 +128,7 @@ class Regression:
         """Define training data labels"""
         self.labels = labels
         self._update_hypothesis_power()
-        self._log_storage = self.Log(self._d)
+        self._log_storage = self._Logs(self._d)
 
     def take_model_snapshot(self):
         """
@@ -130,7 +142,7 @@ class Regression:
     def get_logs(self):
         return self._log_storage.get_logs() if self._log_storage is not None else [-1]
 
-    def create_coefficients_array(self):
+    def create_coefficients_array(self, r=False):
         """
         Create list of coefficients for each feature based on number of features
         :return: list of coefficients n+1 elements, where n - number of features
@@ -142,6 +154,8 @@ class Regression:
             while self.coefficients[-1] == 0.0:  # avoid ZERO initialization
                 self.coefficients[-1] = (random.randint(-self.RANDOM_WEIGHT_INITIALIZATION,
                                                         self.RANDOM_WEIGHT_INITIALIZATION))
+            if r is True:
+                self.coefficients[-1] /= self.ROUND_AFTER_COMA
         return self.coefficients
 
     def set_model_parameters(self, alpha=1, regularization=0, epoch=1) -> None:
@@ -241,7 +255,7 @@ class Regression:
 
         for e in range(self.epoch):
             coefficients_optimization()
-
+            print("Iteration {} done".format(e + 1))
             # if we want to log it
             if self._log_flag is True:
                 # store data for evaluation
@@ -269,6 +283,8 @@ class Regression:
             self.__temporary_coefficients[coefficient_idx] = self.coefficients[coefficient_idx] \
                                                              * regularization_coefficient - self.alpha \
                                                              * self._get_cost_function_derivative(coefficient_idx)
+            self.__temporary_coefficients[coefficient_idx] = round(self.__temporary_coefficients[coefficient_idx],
+                                                                   self.ROUND_AFTER_COMA)
         self.coefficients = self.__temporary_coefficients.copy()  # update coefficients
 
     def fancy_algo(self):
@@ -291,9 +307,17 @@ class Regression:
             features_data, target_data = self._training_features_data, self._training_target_data
 
         cost_function = 0
+        counts = 0
         for idx in range(m_row):
-            cost_function += pow((self._get_hypothesis(features_data[idx]) - target_data[idx]), 2)
-        return round(cost_function / (2 * m_row), self.ROUND_AFTER_COMA)
+            cost_function += round(pow((self._get_hypothesis(features_data[idx]) - target_data[idx]), 2),
+                                   self.ROUND_AFTER_COMA)
+            if cost_function >= INT32_MAX:
+                counts += 1
+                cost_function %= INT32_MAX
+        cost_function = round(cost_function / (2 * m_row), self.ROUND_AFTER_COMA)
+        for c in range(counts):
+            cost_function += round(INT32_MAX / (2 * m_row), self.ROUND_AFTER_COMA)
+        return cost_function
 
     def _get_cost_function_derivative(self, current_coefficient_idx: int) -> float:
         """
@@ -309,7 +333,7 @@ class Regression:
             if current_coefficient_idx == Regression._BIAS_INDEX:
                 der_part = 1
             else:
-                der_part = features_data[idx][current_coefficient_idx-1]
+                der_part = features_data[idx][current_coefficient_idx - 1]
             cost_function_derivative += round(((self._get_hypothesis(features_data[idx]) - target_data[idx])
                                                * der_part),
                                               self.ROUND_AFTER_COMA)
@@ -325,7 +349,7 @@ class Regression:
         hypothesis = self.coefficients[0]
         for idx in range(1, n_features + 1):
             coefficient = self.coefficients[idx]
-            feature_value = features_data_line[idx-1]
+            feature_value = features_data_line[idx - 1]
             hypothesis += round(coefficient * feature_value, self.ROUND_AFTER_COMA)
         return hypothesis
 

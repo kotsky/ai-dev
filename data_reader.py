@@ -139,6 +139,8 @@ class DataTable:
                 return
             scaling_coefficient = max(abs(self.max), abs(self.min))
             self.scaled_value = scaling_coefficient
+            if self.scaled_value == 0:
+                return
             for idx in range(len(self)):
                 self.data[idx] = round((self.data[idx] / scaling_coefficient),
                                        self.ROUND_AFTER_COMA)
@@ -249,6 +251,7 @@ class DataTable:
                 try:
                     array_of_strings[_idx] = float(array_of_strings[_idx])
                 except:
+                    # TODO modification to read words for classification problems
                     array_of_strings[_idx] = 0.0
             return array_of_strings
 
@@ -392,6 +395,18 @@ class DataTable:
             features_label.append(feature_name)
         target_name = self._get_target_name()
         return features_label, target_name
+
+    def get_column_data(self, column_name: str) -> list:
+        """
+        Get data from the given column
+        :param column_name: name from data table
+        :return: list of data
+        """
+
+        if column_name not in self.head:
+            return []
+
+        return self.table[column_name].data
 
     def plot(self, parameter1=None, parameter2=None, features2target=False, all2target=False) -> None:
         """
@@ -728,7 +743,7 @@ if __name__ == '__main__':
     print(table)
 
     # table.plot(features2target=True)
-    # table.plot(all2target=True)
+    table.plot(all2target=True)
     # table.plot(head[0], head[1])
     print()
 
