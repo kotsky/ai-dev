@@ -1,3 +1,6 @@
+import matplotlib.pyplot as plt
+import regression as rg
+
 def levenshtein_distance(str1: str, str2: str) -> int:
     """
     Return the minimum edits needs to do to
@@ -41,6 +44,39 @@ def check_spelling_helper(word: str, set_of_words) -> str:
     return proposed_name
 
 
+def column2list(column: list, column_idx: int) -> list:
+
+    if len(column) <= 1:
+        return column if column else []
+
+    if column_idx >= len(column[0]):
+        return [-1]
+
+    new_column = []
+
+    for line in column:
+        new_column.append(line[column_idx])
+    return new_column
+
+
+def plot2d_target2predict(regression_model: rg.Regression, test_features: list,
+                          test_target: list, feature_name: str, target_name: str,
+                          feature_idx: int, loc_place="upper left"):
+    """Draw script target vs prediction from a regression model defined by rg.Regression"""
+    predicted = []
+    for test in test_features:
+        predicted.append(regression_model.predict(test))
+    axis1 = column2list(test_features, feature_idx)
+    plt.title("Config: alpha = {}, regul = {}, epoch = {}".format(regression_model.alpha,
+                                                                  regression_model.regularization,
+                                                                  regression_model.epoch))
+    plt.scatter(axis1, test_target, label="Target")
+    plt.scatter(axis1, predicted, label="Predicted")
+    plt.legend(loc=loc_place)
+    plt.xlabel(feature_name)
+    plt.ylabel(target_name)
+    plt.show()
+
 """
     fig, axs = plt.subplots(2, 2)
     axs[0, 0].plot(x, y)
@@ -59,3 +95,5 @@ def check_spelling_helper(word: str, set_of_words) -> str:
     for ax in axs.flat:
         ax.label_outer()
 """
+
+# def _subplot_helper(vertical_figures, horizontal_figures, )
