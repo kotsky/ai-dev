@@ -234,7 +234,7 @@ class Regression:
             self._testing_target_data = target_data
         return True
 
-    def evaluation(self, data_for_evaluation: (list, list), metric="MAE"):
+    def evaluation(self, data_for_evaVluation: (list, list), metric="MAE"):
 
         def mae(_data_for_evaluation: (list, list)) -> float:
             """
