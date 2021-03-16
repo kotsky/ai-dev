@@ -177,6 +177,7 @@ class Regression:
                                                         self.RANDOM_WEIGHT_INITIALIZATION))
             if r is True:
                 self.coefficients[-1] /= self.RANDOM_WEIGHT_INITIALIZATION
+        print("Initial coefficients were initialized " + str(self.coefficients))
         return self.coefficients
 
     def set_model_parameters(self, alpha=1, regularization=0, epoch=1) -> None:
@@ -234,7 +235,7 @@ class Regression:
             self._testing_target_data = target_data
         return True
 
-    def evaluation(self, data_for_evaVluation: (list, list), metric="MAE"):
+    def evaluation(self, data_for_evaluation: (list, list), metric="MAE"):
 
         def mae(_data_for_evaluation: (list, list)) -> float:
             """
@@ -258,14 +259,18 @@ class Regression:
 
         return -1.0
 
-    def fit(self, method="gd") -> list:
+    def fit(self, method="gd", scaled_coefficients=False) -> list:
         """
         Train our model
+        :param scaled_coefficients: do we wanna to have coeff in range -1..1
         :param method: "gd" - gradient descent
         :return: optimized coefficients
         """
-        if not self.coefficients:
-            self.create_coefficients_array()
+
+        # create new set of random coefficients
+        self.create_coefficients_array(scaled_coefficients)
+
+        print("Initiated coefficients are " + str(self.coefficients))
 
         if method == "fancy_algo":
             coefficients_optimization = self.fancy_algo

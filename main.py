@@ -71,6 +71,7 @@ if __name__ == '__main__':
     # for _x in x:
     #     y.append(regression_model.coefficients[1]*_x + regression_model.coefficients[0])
 
+    # plt.ylim([0.6, 1])
     plt.scatter(axis1, test_target, label="Target")
     plt.scatter(axis1, predicted, label="Predicted")
     plt.title("YO")
@@ -84,11 +85,11 @@ if __name__ == '__main__':
     """
     ...
     Iteration 1000 done
-    Coefficients [-1.55637, 4.81319, 11.87481, 4.5559, 5.51779, 2.46835, 1.13174] give error 17.65038
+    Coefficients [-1.55637, 4.81319, 11.87481, 4.5559, 5.51779, 2.46835, 1.13174] give error 17.65038 not scaled
     
     Iteration 1000 done
     1.15217 -1.91057 * FUELCONSUMPTION_COMB_MPG + 1.02521 * FUELCONSUMPTION_COMB_MPG^2
-    Coefficients [1.15217, -1.91057, 1.02521] give error 0.0302
+    Coefficients [1.15217, -1.91057, 1.02521] give error 0.0302 scaled
     
     """
 
