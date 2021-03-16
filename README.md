@@ -5,7 +5,9 @@ No numpy, no pandas, no sklearn. Only Hardcore.
 
 Own AI/ML algorithms implementation from scratch and its testing.
 
-The reason I do that: it's simply to pick some cool powerful libs up and code ML model within just a few lines, which helps you to understand the concept. In my case, I want to design this concept.
+The reason I do that: it's simply to pick some cool powerful 
+libs up and code ML model within just a few lines, which help 
+you to understand the concept. In my case, I want to feel this concept.
 
 There are:
 - [regression](https://github.com/kotsky/ai-dev/regression): linear, non-linear, multi-variable.

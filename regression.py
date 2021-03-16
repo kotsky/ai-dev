@@ -26,50 +26,67 @@ class Regression:
 
     class _Logs:
         """
-        Entity to save training process each iteration in a way:
-        [0] 1 epoch: ID, Jtr, Jcv, h_power, alpha, reg, coefficients
-        [1] 2 epoch: ....
+        Entity to save training/testing cost function each iteration.
+        Cost functions are saved per each iteration (epoch).
+        Model config is stored here as well for further drawing.
         ...
         """
-        logs_path = "logs/"
+        # logs_path = "logs/"
 
-        class LogNode:
-            def __init__(self, cost_training_function, cost_test_function,
-                         coefficients, alpha, regularization, d, i_d):
-                self.cost_test_function = cost_test_function  # final after iteration
-                self.cost_training_function = cost_training_function
-                self.coefficients = coefficients
-                self.alpha = alpha
-                self.regularization = regularization
-                self.d = d  # hypothesis power
-                self.id = i_d
+        # class LogNode:
+        #     def __init__(self, cost_training_function, cost_test_function,
+        #                  coefficients, alpha, regularization, d, i_d):
+        #         self.cost_test_function = cost_test_function  # final after iteration
+        #         self.cost_training_function = cost_training_function
+        #         self.coefficients = coefficients
+        #         self.alpha = alpha
+        #         self.regularization = regularization
+        #         self.d = d  # hypothesis power
+        #         self.id = i_d
+        #
+        #     def __str__(self):
+        #         return "ID {}, Jtr = {}, Jcv = {}, h_power = {}, alpha = {}, reg = {}". \
+        #             format(self.id, self.cost_training_function, self.cost_test_function,
+        #                    self.d, self.alpha, self.regularization)
+        #
+        #     def __repr__(self):
+        #         return "Log {}".format(self.id)
 
-            def __str__(self):
-                return "ID {}, Jtr = {}, Jcv = {}, h_power = {}, alpha = {}, reg = {}". \
-                    format(self.id, self.cost_training_function, self.cost_test_function,
-                           self.d, self.alpha, self.regularization)
-
-            def __repr__(self):
-                return "Log {}".format(self.id)
-
-        def __init__(self, d):
-            self.training_storage = []
-            self._d = d
+        def __init__(self, alpha, regularization, iterations, training_cf=None, testing_cf=None):
+            if training_cf is None:
+                training_cf = []
+            if testing_cf is None:
+                testing_cf = []
+            self.training_cf = training_cf  # training cost function
+            self.testing_cf = testing_cf  # testing cost function
+            self.alpha = alpha
+            self.regularization = regularization
+            self.iterations = iterations
 
         def __repr__(self):
-            return "Logs of model power {}".format(self._d)
+            return "Logs of model settings alpha = {}, reg = {}".format(self.alpha, self.regularization)
 
         def __len__(self):
-            return len(self.training_storage)
+            return len(self.training_cf)
+
+        def copy(self):
+            return Regression._Logs(self.alpha, self.regularization, self.iterations,
+                                    self.training_cf, self.testing_cf)
 
         def add_log(self, cost_training_function: float, cost_test_function: float,
                     coefficients: list, alpha: float, regularization: float) -> None:
-            node = Regression._Logs.LogNode(cost_training_function, cost_test_function,
-                                            coefficients, alpha, regularization, self._d, len(self))
-            self.training_storage.append(node)
+            # node = Regression._Logs.LogNode(cost_training_function, cost_test_function,
+            #                                 coefficients, alpha, regularization, self._d, len(self))
+            # self.alpha = alpha
+            # self.regularization = regularization
+            self.training_cf.append(cost_training_function)
+            self.testing_cf.append(cost_test_function)
 
         def get_logs(self):
-            return self.training_storage
+            """
+            Return brand new entity for further logs' procession
+            """
+            return self.copy()
 
     _TRAINING = "training"
     _TESTING = "testing"
@@ -129,7 +146,6 @@ class Regression:
         """Define training data labels"""
         self.labels = labels
         self._update_hypothesis_power()
-        self._log_storage = self._Logs(self._d)
 
     def take_model_snapshot(self):
         """
@@ -141,6 +157,9 @@ class Regression:
                                   self.coefficients.copy(), self.alpha, self.regularization)
 
     def get_logs(self):
+        """
+        :return: get brand new log entity.
+        """
         return self._log_storage.get_logs() if self._log_storage is not None else [-1]
 
     def create_coefficients_array(self, r=False):
@@ -149,6 +168,7 @@ class Regression:
         :return: list of coefficients n+1 elements, where n - number of features
         """
         n = self.get_number_of_training_features()
+        self.coefficients = []
         for idx in range(n + 1):  # one more for bias coefficient
             self.coefficients.append(random.randint(-self.RANDOM_WEIGHT_INITIALIZATION,
                                                     self.RANDOM_WEIGHT_INITIALIZATION))
@@ -156,7 +176,7 @@ class Regression:
                 self.coefficients[-1] = (random.randint(-self.RANDOM_WEIGHT_INITIALIZATION,
                                                         self.RANDOM_WEIGHT_INITIALIZATION))
             if r is True:
-                self.coefficients[-1] /= self.ROUND_AFTER_COMA
+                self.coefficients[-1] /= self.RANDOM_WEIGHT_INITIALIZATION
         return self.coefficients
 
     def set_model_parameters(self, alpha=1, regularization=0, epoch=1) -> None:
@@ -255,6 +275,10 @@ class Regression:
                 self.__temporary_coefficients = self.coefficients.copy()
 
         _mod = 0
+
+        # update Logs with model config
+        self._log_storage = self._Logs(self.alpha, self.regularization, self.epoch)
+
         for e in range(self.epoch):
             coefficients_optimization()
             if _mod == self.epoch//4:

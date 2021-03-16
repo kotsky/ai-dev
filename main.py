@@ -2,21 +2,7 @@ import data_reader as dr
 import regression
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
-
-
-def column2list(column: list, column_idx: int) -> list:
-
-    if len(column) <= 1:
-        return column if column else []
-
-    if column_idx >= len(column[0]):
-        return [-1]
-
-    new_column = []
-
-    for line in column:
-        new_column.append(line[column_idx])
-    return new_column
+from helper_methods import *
 
 
 if __name__ == '__main__':
@@ -25,12 +11,13 @@ if __name__ == '__main__':
 
     head = main_data_table.head
     main_data_table.activate_features("FUELCONSUMPTION_COMB_MPG")
+    # main_data_table.activate_features("ENGINESIZE")
     # for feature in label_data.head:
     #     main_data_table.activate_features(feature)
     # main_data_table.deactivate_feature(head[-1])
-    main_data_table.select_target(head[-1])
+    main_data_table.select_target("CO2EMISSIONS")
 
-    main_data_table.add_new_feature("FUELCONSUMPTION_COMB_MPG", power=2)
+    # main_data_table.add_new_feature("FUELCONSUMPTION_COMB_MPG", power=2)
     main_data_table.max_scaling()
     main_data_table.split_data(0.6, 0.2, shuffle=True)
     training_data = main_data_table.get_training_data()
@@ -45,11 +32,12 @@ if __name__ == '__main__':
     regression_model.set_testing_data(test_data[0], test_data[1])
     # regression_model.log_mode()
     regression_model.RANDOM_WEIGHT_INITIALIZATION = 10
-    regression_model.ROUND_AFTER_COMA = 5
-    regression_model.epoch = 2000
-    regression_model.alpha = 0.2
-    regression_model.regularization = 0.1
-    regression_model.create_coefficients_array()
+    regression_model.ROUND_AFTER_COMA = 6
+    regression_model.epoch = 500
+    regression_model.alpha = 0.01
+    regression_model.regularization = 0
+    regression_model.create_coefficients_array(True)
+    print(regression_model.coefficients)
     coeff = regression_model.fit()
     error = regression_model.evaluation(cv_data)
     print("Coefficients {} give error {}".format(coeff, error))
@@ -83,8 +71,13 @@ if __name__ == '__main__':
     # for _x in x:
     #     y.append(regression_model.coefficients[1]*_x + regression_model.coefficients[0])
 
-    plt.scatter(axis1, test_target)
-    plt.scatter(axis1, predicted)
+    plt.scatter(axis1, test_target, label="Target")
+    plt.scatter(axis1, predicted, label="Predicted")
+    plt.title("YO")
+    plt.legend(loc="upper right")
+    plt.xlabel("FUELCONSUMPTION_COMB_MPG")
+    plt.ylabel("CO2EMISSIONS")
+
     # plt.plot(x, y)
     plt.show()
 
