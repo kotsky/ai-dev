@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import regression as rg
 
+
 def levenshtein_distance(str1: str, str2: str) -> int:
     """
     Return the minimum edits needs to do to
@@ -44,17 +45,23 @@ def check_spelling_helper(word: str, set_of_words) -> str:
     return proposed_name
 
 
-def column2list(column: list, column_idx: int) -> list:
+def column2list(matrix: list, column_idx: int) -> list:
+    """
+    Convert column from features 2D matrix to 1D list of
+    that feature.
+    :param matrix: 2D square array of number
+    :param column_idx: column index in the matrix
+    :return:
+    """
+    if len(matrix) <= 1:
+        return matrix if matrix else []
 
-    if len(column) <= 1:
-        return column if column else []
-
-    if column_idx >= len(column[0]):
+    if column_idx >= len(matrix[0]):
         return [-1]
 
     new_column = []
 
-    for line in column:
+    for line in matrix:
         new_column.append(line[column_idx])
     return new_column
 
@@ -77,6 +84,7 @@ def plot2d_target2predict(regression_model: rg.Regression, test_features: list,
     plt.ylabel(target_name)
     plt.show()
 
+
 """
     fig, axs = plt.subplots(2, 2)
     axs[0, 0].plot(x, y)
@@ -95,5 +103,3 @@ def plot2d_target2predict(regression_model: rg.Regression, test_features: list,
     for ax in axs.flat:
         ax.label_outer()
 """
-
-# def _subplot_helper(vertical_figures, horizontal_figures, )

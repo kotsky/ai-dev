@@ -10,7 +10,7 @@ Author: kotsky
 """
 import random
 
-INT32_MAX = 2147483646 // 2
+INT32_MAX = 2147483646 // 2  # in half
 
 
 class Regression:
@@ -94,14 +94,13 @@ class Regression:
 
     # CONFIG
     ROUND_AFTER_COMA = 2
-    RANDOM_WEIGHT_INITIALIZATION = 50  # range where coefficients will be defined initially
+    RANDOM_WEIGHT_INITIALIZATION = 20  # range where coefficients will be defined initially
 
     def __init__(self):
         self.labels = ([], None)  # features, target
 
         self._training_features_data = [[]]
         self._training_target_data = []
-        # self.training_data =
 
         self.coefficients = []
         self.alpha = 1  # learning rate
@@ -110,7 +109,6 @@ class Regression:
 
         self._testing_features_data = [[]]
         self._testing_target_data = []
-        # self.testing_data =
 
         # self.best_setup = {"minJ": float("inf"), "coefficients": []}  # to store best found model setup
 
@@ -177,7 +175,7 @@ class Regression:
                                                         self.RANDOM_WEIGHT_INITIALIZATION))
             if r is True:
                 self.coefficients[-1] /= self.RANDOM_WEIGHT_INITIALIZATION
-        print("Initial coefficients were initialized " + str(self.coefficients))
+        print("Initiated coefficients are " + str(self.coefficients))
         return self.coefficients
 
     def set_model_parameters(self, alpha=1, regularization=0, epoch=1) -> None:
@@ -210,30 +208,6 @@ class Regression:
         """
         return self._set_features_data(feature_data, is_training=False) and \
                self._set_target_data(target_data, is_training=False)
-
-    def _set_features_data(self, features_data: list, is_training=True) -> bool:
-        """
-        Helper method of set_training_data() and set_testing_data()
-        """
-        if not features_data:
-            return False
-        if is_training is True:
-            self._training_features_data = features_data
-        else:
-            self._testing_features_data = features_data
-        return True
-
-    def _set_target_data(self, target_data: list, is_training=True) -> bool:
-        """
-        Helper method of set_training_data() and set_testing_data()
-        """
-        if not target_data:
-            return False
-        if is_training is True:
-            self._training_target_data = target_data
-        else:
-            self._testing_target_data = target_data
-        return True
 
     def evaluation(self, data_for_evaluation: (list, list), metric="MAE"):
 
@@ -269,8 +243,6 @@ class Regression:
 
         # create new set of random coefficients
         self.create_coefficients_array(scaled_coefficients)
-
-        print("Initiated coefficients are " + str(self.coefficients))
 
         if method == "fancy_algo":
             coefficients_optimization = self.fancy_algo
@@ -353,6 +325,30 @@ class Regression:
         for c in range(counts):
             cost_function += round(INT32_MAX / (2 * m_row), self.ROUND_AFTER_COMA)
         return cost_function
+
+    def _set_features_data(self, features_data: list, is_training=True) -> bool:
+        """
+        Helper method of set_training_data() and set_testing_data()
+        """
+        if not features_data:
+            return False
+        if is_training is True:
+            self._training_features_data = features_data
+        else:
+            self._testing_features_data = features_data
+        return True
+
+    def _set_target_data(self, target_data: list, is_training=True) -> bool:
+        """
+        Helper method of set_training_data() and set_testing_data()
+        """
+        if not target_data:
+            return False
+        if is_training is True:
+            self._training_target_data = target_data
+        else:
+            self._testing_target_data = target_data
+        return True
 
     def _get_cost_function_derivative(self, current_coefficient_idx: int) -> float:
         """

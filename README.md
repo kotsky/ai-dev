@@ -5,27 +5,32 @@ No numpy, no pandas, no sklearn. Only Hardcore.
 
 Own AI/ML algorithms implementation from scratch and its testing.
 
-The reason I do that: it's simply to pick some cool powerful 
-libs up and code ML model within just a few lines, which help 
-you to understand the concept. In my case, I want to feel this concept.
+The reason I do that: to learn internals of ml algorithms.
 
 There are:
-- [regression](https://github.com/kotsky/ai-dev/regression): linear, non-linear, multi-variable.
+- [regression](https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb): linear, non-linear, multi-variable.
 - (later) classification: KNN? SVM?
 
 To support data manipulation, I developed data_reader.py package instead of using pandas libs.
 
 # Regression
-1. Simply about regression.
-2. Regression implementation.
-3. About our data.
-4. Results
+1. Regression implementation.
+2. About used data.
+3. Results
 
-## About regression
-What is regression? Bla-bla
 ## Regression implementation
-With gradient descent. ...
+Regression was implemented with:
+- optimization algorithm: gradient descent
+- learning rate
+- regularization (penalty) L2 (Lasso)
+- for various number of iterations
+- logs writing for further debugging / plot
+
 ## About data
 Fuel Consumption vs CO2 EMISSIONS in /data
 ## Results
-Workflow can be found here (jupiter notebook)
+Trained model shows as little as 3% error of prediction.
+
+Workflow can be found here 
+
+https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
