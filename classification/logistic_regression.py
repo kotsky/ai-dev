@@ -1,9 +1,15 @@
-"""Regression AI model
+"""Logistic Regression AI model
 
-It can be used for:
-    * Linear regression
-    * Non-linear regression
-    * Polynomial regression
+0 or 1 with LR.
+
+Implemented with:
+    * optimization algorithm: gradient descent
+    * learning rate
+    * regularization (penalty) L2 (Lasso)
+    * for various number of iterations
+    * logs writing for further debugging / plot
+    * adjustable logistic coefficient for prediction threshold
+    * evaluation with confusion matrix, precision and recall
 
 Author: kotsky
 

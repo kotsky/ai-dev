@@ -5,6 +5,13 @@ It can be used for:
     * Non-linear regression
     * Polynomial regression
 
+Implemented with:
+    * optimization algorithm: gradient descent
+    * learning rate
+    * regularization (penalty) L2 (Lasso)
+    * for various number of iterations
+    * logs writing for further debugging / plot
+
 Alternative to use:
     def train_linear_reg(X, y):
         weights = np.dot(np.dot(np.linalg.inv(np.dot(X.T, X)), X.T), y)
