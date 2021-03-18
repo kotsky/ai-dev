@@ -26,8 +26,8 @@ Follow jupyter notebook workflow for better
 understanding of how to apply data_reader and
 Logistic Regression model to train your AI.
 
-Link: https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
-Package: https://github.com/kotsky/ai-dev/blob/main/regression.py
+Link: https://github.com/kotsky/ai-dev/blob/main/logistic_regression_workflow.ipynb
+Package: https://github.com/kotsky/ai-dev/blob/main/logistic_regression.py
 
 """
 
