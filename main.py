@@ -30,4 +30,8 @@ Package: https://github.com/kotsky/ai-dev/blob/main/classification/logistic_regr
 
 
 if __name__ == '__main__':
-    pass
+
+    main_data = dr.DataTable("data/loan_train.csv")
+    target_name = "loan_status"
+    main_data.select_target(target_name)
+    main_data.plot(parameter1='age', parameter2='Gender', classifier=target_name)

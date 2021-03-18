@@ -53,9 +53,15 @@ With:
 ## About data
 Loan data in /data
 ## Results
-Trained model has 73% accuracy of prediction and 44% recall.
+Trained model has 71% accuracy of prediction and 93% recall.
+This was achieved via logistic threshold adjustment to maximize f1 score.
 Can be improved.
 
 Workflow can be found here 
 
 https://github.com/kotsky/ai-dev/blob/main/logistic_regression_workflow.ipynb
+
+78% accuracy was achieved by using standard libs (sklearn). 
+Its workflow can be found here 
+
+https://github.com/kotsky/ai-studies/blob/main/Projects/Project%20Loan/Loan%20Model.ipynb

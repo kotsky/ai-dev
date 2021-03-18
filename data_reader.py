@@ -165,7 +165,7 @@ class DataTable:
         self.file_path = file_path
         self.features = {}
         self.target = {}
-        self.class_dict = {}  # contains words indexes per column
+        self.class_dict = {}  # contains words indexes per column = [{ "word" : 0 }, { 0 : "word"}]
         self._data_is_scaled = False
         self._split_pointers = {self._TRAINING: [[0, 0], False],
                                 self._CV: [[0, 0], False],
@@ -226,6 +226,7 @@ class DataTable:
         new_structure.target = _repointing(list(self.target.keys()), new_structure.table)
         new_structure._data_is_scaled = self._data_is_scaled
         new_structure._split_pointers = _deepcopy(self._split_pointers)
+        new_structure.class_dict = self.class_dict.copy()
         return new_structure
 
     def open_table(self, file_path=None):
@@ -280,14 +281,15 @@ class DataTable:
                     column_name = self.head[_idx]
 
                     if column_name not in self.class_dict:
-                        self.class_dict[column_name] = {"_count": 0}
+                        self.class_dict[column_name] = [{"_count": 0}, {}]
 
-                    word_count = self.class_dict[column_name]["_count"]
-                    if word not in self.class_dict[column_name]:
-                        self.class_dict[column_name][word] = word_count
-                        self.class_dict[column_name]["_count"] += 1
+                    word_count = self.class_dict[column_name][0]["_count"]
+                    if word not in self.class_dict[column_name][0]:
+                        self.class_dict[column_name][0][word] = word_count
+                        self.class_dict[column_name][1][word_count] = word
+                        self.class_dict[column_name][0]["_count"] += 1
 
-                    line_split[_idx] = self.class_dict[column_name][word]
+                    line_split[_idx] = self.class_dict[column_name][0][word]
                     word_flag = True
 
             line_split_float = line_split
@@ -415,9 +417,12 @@ class DataTable:
 
         return self.table[column_name].data
 
-    def plot(self, parameter1=None, parameter2=None, features2target=False, all2target=False) -> None:
+    def plot(self, parameter1=None, parameter2=None,
+             features2target=False, all2target=False,
+             classifier=None) -> None:
         """
         Plot 2D pictures.
+        :param classifier: mark each dot as its class with a color
         :param parameter1: axis 1 column name
         :param parameter2: axis 2 column name
         :param features2target: plot all features to target
@@ -447,7 +452,71 @@ class DataTable:
 
         elif parameter1 is not None and parameter2 is not None:
             if parameter1 in self.table and parameter2 in self.table:
-                self._plot2d_helper(parameter1, parameter2, "green")
+                if classifier is None:
+                    self._plot2d_helper(parameter1, parameter2, "green")
+                else:
+                    self._plot2d_helper_with_classifier(parameter1, parameter2, classifier)
+
+    def _plot2d_helper_with_classifier(self, parameter1, parameter2, classifier):
+        """Draw a picture of 2 features, where data is market per its target class"""
+
+        def _define_class_map(column_name: str, main_structure: DataTable):
+            class_map = []
+            if column_name in main_structure.class_dict:
+                idx2class = main_structure.class_dict[column_name][1]
+                for key in idx2class:
+                    word = idx2class[key]
+                    class_map.append("{} - {}".format(key, word))
+            return class_map if len(class_map) > 0 else ''
+
+        import matplotlib.pyplot as plt
+
+        parameter1_data = self.table[parameter1].data
+        parameter2_data = self.table[parameter2].data
+
+        target_name = classifier
+        target_data = self.table[target_name].data
+
+        target_class_map = self.class_dict[target_name][1]
+
+        m_rows = len(parameter1_data)
+
+        # class_colours = ['b', 'g', 'r']
+
+        truth = [False, False, False]
+
+        for m_idx in range(m_rows):
+            f1 = parameter1_data[m_idx]
+            f2 = parameter2_data[m_idx]
+            t = target_data[m_idx]
+            if t == 0:
+                colour = 'b'
+                label_ = 'Class 0 as ' + str(target_class_map[t])
+                p = 0
+            elif t == 1:
+                colour = 'r'
+                label_ = 'Class 1 as ' + str(target_class_map[t])
+                p = 1
+            else:
+                colour = 'g'
+                label_ = 'Class is undefined'
+                p = 2
+
+            if (p == 0 and not truth[p]) or (p == 1 and not truth[p]) or (p == 2 and not truth[p]):
+                plt.scatter(f1, f2, color=colour, label=label_)
+                truth[p] = True
+            else:
+                plt.scatter(f1, f2, color=colour)
+
+        plt.title(target_name + ' vs ' + parameter1 + ' & ' + parameter2)
+        plt.legend(loc='best')
+
+        parameter1_classification = _define_class_map(parameter1, self)
+        parameter2_classification = _define_class_map(parameter2, self)
+
+        plt.xlabel(parameter1 + ' ' + str(parameter1_classification))
+        plt.ylabel(parameter2 + ' ' + str(parameter2_classification))
+        plt.show()
 
     def _get_target_name(self) -> str:
         target_name = list(self.target.keys())[0]
