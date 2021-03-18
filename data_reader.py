@@ -36,7 +36,7 @@ class DataTable:
         target - column of control value, desired outcome of our AI model, (our y)
 
     Methods to use:
-        * open_file(file_path)
+        * open_file(file_path) - can read words as well, transferring to numerical value and doing mapping
         * activate_feature(feature_name: str) - let user decide which feature to use in training set
         * deactivate_feature(feature_name: str) - let user decide which feature to disable in training set
         * add_new_feature([feature_name1, feature_name2, ...]: list of str, power: optional float) -
@@ -163,14 +163,15 @@ class DataTable:
         self.head = []
         self.table = {}
         self.file_path = file_path
-        if file_path is not None:
-            self.open_table(file_path)
         self.features = {}
         self.target = {}
+        self.class_dict = {}  # contains words indexes per column
         self._data_is_scaled = False
         self._split_pointers = {self._TRAINING: [[0, 0], False],
                                 self._CV: [[0, 0], False],
                                 self._TESTING: [[0, 0], False]}
+        if file_path is not None:
+            self.open_table(file_path)
 
     def __repr__(self):
         if self.head:
@@ -242,19 +243,6 @@ class DataTable:
             string = string[:-1]
             return string
 
-        def _str2float(array_of_strings):
-            """
-            :param array_of_strings: ['2.3', '4']
-            :return: [2.3, 4.0]
-            """
-            for _idx in range(len(array_of_strings)):
-                try:
-                    array_of_strings[_idx] = float(array_of_strings[_idx])
-                except:
-                    # TODO modification to read words for classification problems
-                    array_of_strings[_idx] = 0.0
-            return array_of_strings
-
         def _split_clean(_line):
             """
             :param _line: "apple,orange,something\n"
@@ -282,7 +270,27 @@ class DataTable:
             line = lines.pop()
             line_split = _split_clean(line)
 
-            line_split_float = _str2float(line_split)
+            #  ['2.3', '4'] =>[2.3, 4.0]
+            for _idx in range(len(line_split)):
+                try:
+                    line_split[_idx] = float(line_split[_idx])
+                except:
+                    word = line_split[_idx]
+
+                    column_name = self.head[_idx]
+
+                    if column_name not in self.class_dict:
+                        self.class_dict[column_name] = {"_count": 0}
+
+                    word_count = self.class_dict[column_name]["_count"]
+                    if word not in self.class_dict[column_name]:
+                        self.class_dict[column_name][word] = word_count
+                        self.class_dict[column_name]["_count"] += 1
+
+                    line_split[_idx] = self.class_dict[column_name][word]
+                    word_flag = True
+
+            line_split_float = line_split
 
             for idx in range(len(self.head)):
                 name_col = self.head[idx]
@@ -456,7 +464,7 @@ class DataTable:
             copying data
         """
 
-        if not 0.3 <= training_size <= 0.9 or (training_size + cv_size) >= 0.95:
+        if not 0.3 <= training_size <= 0.9 or ((cv_size is not None) and (training_size + cv_size) >= 0.95):
             print("Wrong train-test-cv attitude")
             return None
 
@@ -729,30 +737,4 @@ class DataTable:
 
 
 if __name__ == '__main__':
-    table = DataTable("test_data.csv")
-    print(table)
-    head = table.head
-    table.activate_features([head[1]])
-    table.activate_features(head[3])
-    table.select_target(head[-1])
-    # table.add_new_feature([head[0], head[4]])
-    table.add_new_feature([head[1]], 2)
-    # table.deactivate_feature(head[1])
-
-    table.split_data(0.6, 0.2)
-    table.shuffle()
-    print(table)
-
-    # table.plot(features2target=True)
-    table.plot(all2target=True)
-    # table.plot(head[0], head[1])
-    print()
-
-    table2 = table.copy()
-    table2.max_scaling()
-    table.add_new_feature(head[0], power=0.5)
-
-    scaled_training_data = table2.get_training_data()
-    training_data = table.get_training_data()
-    labels = table.get_labels()
-    print(labels)
+    pass

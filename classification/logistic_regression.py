@@ -5,20 +5,16 @@ It can be used for:
     * Non-linear regression
     * Polynomial regression
 
-Alternative to use:
-    def train_linear_reg(X, y):
-        weights = np.dot(np.dot(np.linalg.inv(np.dot(X.T, X)), X.T), y)
-        return weights
-
 Author: kotsky
 
 """
 import random
+import math
 
 INT32_MAX = 2147483646 // 2  # in half
 
 
-class Regression:
+class LogisticRegression:
     """
     Regression model based on gradient descent, which comes with standard:
     * fit()
@@ -75,7 +71,7 @@ class Regression:
             return len(self.training_cf)
 
         def copy(self):
-            return Regression._Logs(self.alpha, self.regularization, self.iterations,
+            return LogisticRegression._Logs(self.alpha, self.regularization, self.iterations,
                                     self.training_cf, self.testing_cf)
 
         def add_log(self, cost_training_function: float, cost_test_function: float,
@@ -111,6 +107,7 @@ class Regression:
         self.alpha = 1  # learning rate
         self.regularization = 0  # regularization value: Lasso Regularization
         self.epoch = 1  # number of iteration
+        self.logistic_threshold = 0.5
 
         self._testing_features_data = [[]]
         self._testing_target_data = []
@@ -214,27 +211,43 @@ class Regression:
         return self._set_features_data(feature_data, is_training=False) and \
                self._set_target_data(target_data, is_training=False)
 
-    def evaluation(self, data_for_evaluation: (list, list), metric="MAE"):
+    def evaluation(self, data_for_evaluation: (list, list), metric="confusion_matrix"):
 
-        def mae(_data_for_evaluation: (list, list)) -> float:
-            """
-            Mean abs evaluation.
-            :param _data_for_evaluation: (feature data, corresponding target data)
-            :return: mean abs error as mean(abs(hypothesis() - y_hat))
-            """
-            feature_data, target_data = _data_for_evaluation
-            error = 0
-            for idx in range(len(feature_data)):
-                error += abs(self._get_hypothesis(feature_data[idx]) - target_data[idx])
-            error = round(error / len(feature_data), self.ROUND_AFTER_COMA)
-            return error
+        def confusion_matrix(data: (list, list)) -> (list, float, float):
+            true_positive = 0
+            true_negative = 0
+            false_positive = 0
+            false_negative = 0
+
+            features, target = data
+
+            for idx in range(len(features)):
+                prediction = self.predict(features[idx])
+                if prediction == 1 and target[idx] == 1:
+                    true_positive += 1
+                elif prediction == 1 and target[idx] == 0:
+                    false_positive += 1
+                elif prediction == 0 and target[idx] == 1:
+                    false_negative += 1
+                else:
+                    true_negative += 1
+
+            m = len(features)
+            matrix = [[round(true_positive/m, self.ROUND_AFTER_COMA),
+                       round(false_positive/m, self.ROUND_AFTER_COMA)],
+                      [round(false_negative / m, self.ROUND_AFTER_COMA),
+                       round(true_negative / m, self.ROUND_AFTER_COMA)]]
+            precision = true_positive / (true_positive + false_positive)
+            recall = true_positive / (true_positive + false_negative)
+            return matrix, precision, recall
 
         if not self.coefficients:
             print("There is no coefficients for prediction. Train model first")
             return [-1]
 
-        if metric == "MAE":
-            return mae(data_for_evaluation)
+        if metric == "confusion_matrix":
+            # conf_matrix, precision, recall = confusion_matrix(data_for_evaluation)
+            return confusion_matrix(data_for_evaluation)
 
         return -1.0
 
@@ -275,15 +288,23 @@ class Regression:
 
         return self.coefficients
 
-    def predict(self, new_feature_data_line):
+    def predict(self, new_feature_data_line, raw_output=False):
         """
+        :param raw_output: do we want to convert predicted value to 0 or 1?
         :param new_feature_data_line: data line of features input
         :return: predicted target value based on model coefficients, otherwise return -1 if error
         """
         if not self.coefficients or len(new_feature_data_line) != len(self.coefficients) - 1:
-            print("No coefficients. Train model")
+            print("No coefficients. Train model or too many features passed through")
             return -1
-        return self._get_hypothesis(new_feature_data_line)
+        prediction = self.sigmoid(self._get_hypothesis(new_feature_data_line))
+        prediction = round(prediction, self.ROUND_AFTER_COMA)
+        if raw_output:
+            return prediction
+        return 1 if prediction >= self.logistic_threshold else 0
+
+    def sigmoid(self, hypothesis_value: float):
+        return round(1 / (1 + pow(math.e, hypothesis_value)), self.ROUND_AFTER_COMA)
 
     def gradient_descent(self) -> None:
         """
@@ -320,16 +341,19 @@ class Regression:
 
         cost_function = 0
         counts = 0
+
         for idx in range(m_row):
-            cost_function += round(pow((self._get_hypothesis(features_data[idx]) - target_data[idx]), 2),
-                                   self.ROUND_AFTER_COMA)
+            y = target_data[idx]
+            hypothesis = self._get_hypothesis(features_data[idx])
+            temp = y * math.log(hypothesis) + (1 - y) * math.log(1 - hypothesis)
+            cost_function += round(temp, self.ROUND_AFTER_COMA)
             if cost_function >= INT32_MAX:
                 counts += 1
                 cost_function %= INT32_MAX
-        cost_function = round(cost_function / (2 * m_row), self.ROUND_AFTER_COMA)
+        cost_function = round((cost_function / m_row), self.ROUND_AFTER_COMA)
         for c in range(counts):
-            cost_function += round(INT32_MAX / (2 * m_row), self.ROUND_AFTER_COMA)
-        return cost_function
+            cost_function += round((INT32_MAX / m_row), self.ROUND_AFTER_COMA)
+        return -cost_function
 
     def _set_features_data(self, features_data: list, is_training=True) -> bool:
         """
@@ -366,7 +390,7 @@ class Regression:
         features_data, target_data = self._training_features_data, self._training_target_data
         cost_function_derivative = 0
         for idx in range(m_row):
-            if current_coefficient_idx == Regression._BIAS_INDEX:
+            if current_coefficient_idx == LogisticRegression._BIAS_INDEX:
                 der_part = 1
             else:
                 der_part = features_data[idx][current_coefficient_idx - 1]
@@ -375,7 +399,7 @@ class Regression:
                                               self.ROUND_AFTER_COMA)
         return round(cost_function_derivative / m_row, self.ROUND_AFTER_COMA)
 
-    def _get_hypothesis(self, features_data_line):
+    def _get_hypothesis(self, features_data_line) -> float:
         """
         Calculate current hypothesis sum with current coefficients
         :param features_data_line: line of features from main table
