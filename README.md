@@ -10,7 +10,7 @@ The reason I do that: to learn internals of ml algorithms.
 There are:
 - [regression](https://github.com/kotsky/ai-dev#regression): linear, non-linear, multi-variable.
 - [logistic regression](https://github.com/kotsky/ai-dev#logistic-regression)
-- KNN
+- [KNN](https://github.com/kotsky/ai-dev#k-nearest-neighbors)
 
 To support data manipulation, I developed data_reader.py package instead of using pandas libs.
 Data is stored in table-like data-structure in the main memory. 
