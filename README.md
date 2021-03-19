@@ -84,3 +84,7 @@ Loan data in /data. This is done to compare results with LR model.
 ### Results
 We can say that k = 4 roughly is the best for our model, 
 which gives 72% accuracy, 74% precision and 94% recall.
+
+Its workflow can be found here: 
+
+https://github.com/kotsky/ai-dev/blob/main/knn_workflow.ipynb
