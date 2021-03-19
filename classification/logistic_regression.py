@@ -219,7 +219,8 @@ class LogisticRegression:
 
     def evaluation(self, data_for_evaluation: (list, list), metric="confusion_matrix"):
 
-        def confusion_matrix(data: (list, list)) -> (list, float, float):
+        def confusion_matrix(data: (list, list),
+                             lr_model: LogisticRegression) -> (list, float, float):
             true_positive = 0
             true_negative = 0
             false_positive = 0
@@ -228,7 +229,7 @@ class LogisticRegression:
             features, target = data
 
             for idx in range(len(features)):
-                prediction = self.predict(features[idx])
+                prediction = lr_model.predict(features[idx])
                 if prediction == 1 and target[idx] == 1:
                     true_positive += 1
                 elif prediction == 1 and target[idx] == 0:
@@ -239,10 +240,10 @@ class LogisticRegression:
                     true_negative += 1
 
             m = len(features)
-            matrix = [[round(true_positive/m, self.ROUND_AFTER_COMA),
-                       round(false_positive/m, self.ROUND_AFTER_COMA)],
-                      [round(false_negative / m, self.ROUND_AFTER_COMA),
-                       round(true_negative / m, self.ROUND_AFTER_COMA)]]
+            matrix = [[round(true_positive/m, lr_model.ROUND_AFTER_COMA),
+                       round(false_positive/m, lr_model.ROUND_AFTER_COMA)],
+                      [round(false_negative / m, lr_model.ROUND_AFTER_COMA),
+                       round(true_negative / m, lr_model.ROUND_AFTER_COMA)]]
             precision = true_positive / (true_positive + false_positive)
             recall = true_positive / (true_positive + false_negative)
             return matrix, precision, recall
@@ -253,7 +254,7 @@ class LogisticRegression:
 
         if metric == "confusion_matrix":
             # conf_matrix, precision, recall = confusion_matrix(data_for_evaluation)
-            return confusion_matrix(data_for_evaluation)
+            return confusion_matrix(data_for_evaluation, self)
 
         return -1.0
 

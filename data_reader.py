@@ -559,10 +559,10 @@ class DataTable:
         self._split_pointers[self._TESTING] = [[ts_p_st, ts_p_end], True]
 
         if cv_size is not None:
-            print("Data was split as follows: {} training set, {} cross-validation set and {} test set".
+            print("Data was split as follows: {} training set, {} cross-validation set and {} testing set".
                   format(training_size, cv_size, (1 - training_size - cv_size)))
         else:
-            print("Data was split as follows: {} training set and {} test set".
+            print("Data was split as follows: {} training set and {} testing set".
                   format(training_size, 1 - training_size))
 
     def shuffle(self) -> None:
