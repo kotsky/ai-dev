@@ -15,7 +15,7 @@ class KNN:
     ROUND_AFTER_COMA = 4
 
     class MaxHeap:
-
+        """For optimized way of storing nearest points"""
         class Node:
             def __init__(self, distance: float, class_idx: int):
                 self.distance = distance

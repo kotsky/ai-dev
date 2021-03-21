@@ -419,7 +419,7 @@ class DataTable:
 
     def plot(self, parameter1=None, parameter2=None,
              features2target=False, all2target=False,
-             classifier=None) -> None:
+             classifier=None, additional_to_draw=None) -> None:
         """
         Plot 2D pictures.
         :param classifier: mark each dot as its class with a color
@@ -456,6 +456,10 @@ class DataTable:
                     self._plot2d_helper(parameter1, parameter2, "green")
                 else:
                     self._plot2d_helper_with_classifier(parameter1, parameter2, classifier)
+
+        if additional_to_draw is not None:
+            for function in additional_to_draw:
+                function()
 
     def _plot2d_helper_with_classifier(self, parameter1, parameter2, classifier):
         """Draw a picture of 2 features, where data is market per its target class"""
@@ -753,6 +757,17 @@ class DataTable:
                     self.activate_features(proposed_name, is_target)
             else:
                 print("There is no table. Upload it before this operation")
+
+    def get_min_max_features(self) -> list:
+        """Return min-max values of each feature columns in list [min, max] format"""
+        if not self.features:
+            print("There are no defined features")
+            return []
+        storage = [[0 for x in range(2)] for y in range(len(self.features))]
+        for idx, key in enumerate(self.features):
+            column = self.features[key]
+            storage[idx] = [column.min, column.max]
+        return storage
 
     def _plot2d_helper(self, axis1: str, axis2: str, colour: str) -> None:
         """

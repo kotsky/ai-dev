@@ -8,9 +8,11 @@ Own AI/ML algorithms implementation from scratch and its testing.
 The reason I do that: to learn internals of ml algorithms.
 
 There are:
-- [regression](https://github.com/kotsky/ai-dev#regression): linear, non-linear, multi-variable.
-- [logistic regression](https://github.com/kotsky/ai-dev#logistic-regression)
-- [KNN](https://github.com/kotsky/ai-dev#k-nearest-neighbors)
+- [Regression](https://github.com/kotsky/ai-dev#regression): linear, non-linear, multi-variable.
+- [Logistic Regression](https://github.com/kotsky/ai-dev#logistic-regression)
+- [K-Nearest Neighbors](https://github.com/kotsky/ai-dev#k-nearest-neighbors)
+- K-Mean (ongoing)
+- Principal Component Analysis
 
 To support data manipulation, I developed data_reader.py package instead of using pandas libs.
 Data is stored in table-like data-structure in the main memory. 
