@@ -27,6 +27,7 @@ class KMean:
 
     def __init__(self):
 
+        self.centroid_mode = None
         self.number_of_centroids = 2
         self.centroids = []
         self.training_data = []
@@ -62,11 +63,21 @@ class KMean:
         """Set range of random centroids' coords initialization"""
         self._min_max_training_ranges = min_max_data
 
+    def centroid_mode_init(self, mode: int) -> None:
+        """
+        Set mode of centroid initialization.
+        :param mode:
+            None - pick up centroids from training data set randomly
+            1 - create random centroids in range min-max of each feature
+        """
+        self.centroid_mode = mode
+
     def _k_mean_core(self):
         """Core body of K-Mean algorithm"""
 
         cost_function_local = []
         for e in range(self.epoch):
+            plt.clf()
             self.draw_centroids()
             self.draw_feature()
             self._assign_centroids_to_point()
@@ -134,15 +145,26 @@ class KMean:
         self._additional_initialization()
 
     def _centroids_initialization(self):
-        """Create random centroids in range min-max of each feature"""
+        """Create centroids based on defined mode per centroid_mode_init"""
+        n_points = self.get_number_of_training_points()
+        temp_array = [-1] * self.number_of_centroids
         self._temp_centroids = [[0 for x in range(self.get_number_of_features())]
                                 for y in range(self.number_of_centroids)]
         for centroid_idx in range(self.number_of_centroids):
-            for feature_idx in range(self.get_number_of_features()):
-                a = self._min_max_training_ranges[feature_idx][0]  # min
-                b = self._min_max_training_ranges[feature_idx][1]  # max
-                self._temp_centroids[centroid_idx][feature_idx] = \
-                    self.random.randrange(a, b)
+            if self.centroid_mode is None:
+                """Random point from data set"""
+                idx = -1
+                while idx in temp_array:  # to avoid similarity of 2+ centroids
+                    idx = self.random.randint(0, n_points - 1)
+                temp_array[centroid_idx] = idx
+                self._temp_centroids[centroid_idx] = self.training_data[idx].copy()
+            elif self.centroid_mode == 1:
+                """Min-Max mode"""
+                for feature_idx in range(self.get_number_of_features()):
+                    a = self._min_max_training_ranges[feature_idx][0]  # min
+                    b = self._min_max_training_ranges[feature_idx][1]  # max
+                    self._temp_centroids[centroid_idx][feature_idx] = \
+                        self.random.randrange(a, b)
 
     def get_number_of_features(self) -> int:
         """Return number of training features"""
