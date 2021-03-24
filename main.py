@@ -5,7 +5,7 @@ understanding of how to apply data_reader and
 Regression model to train your AI.
 
 Link: https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
-Package: https://github.com/kotsky/ai-dev/blob/main/regression.py
+Package: https://github.com/kotsky/ai-dev/blob/main/regression/regression.py
 
 """
 
