@@ -1,7 +1,7 @@
 """Some helper function for jupyter workflow"""
 
 import matplotlib.pyplot as plt
-import regression as rg
+from regression import regression as rg
 
 
 def levenshtein_distance(str1: str, str2: str) -> int:
