@@ -14,6 +14,7 @@ Implemented with:
 Author: kotsky
 
 """
+
 import random
 import math
 
@@ -38,6 +39,7 @@ class LogisticRegression:
         Model config is stored here as well for further drawing.
         ...
         """
+
         # logs_path = "logs/"
 
         # class LogNode:
@@ -78,7 +80,7 @@ class LogisticRegression:
 
         def copy(self):
             return LogisticRegression._Logs(self.alpha, self.regularization, self.iterations,
-                                    self.training_cf, self.testing_cf)
+                                            self.training_cf, self.testing_cf)
 
         def add_log(self, cost_training_function: float, cost_test_function: float,
                     coefficients: list, alpha: float, regularization: float) -> None:
@@ -240,8 +242,8 @@ class LogisticRegression:
                     true_negative += 1
 
             m = len(features)
-            matrix = [[round(true_positive/m, lr_model.ROUND_AFTER_COMA),
-                       round(false_positive/m, lr_model.ROUND_AFTER_COMA)],
+            matrix = [[round(true_positive / m, lr_model.ROUND_AFTER_COMA),
+                       round(false_positive / m, lr_model.ROUND_AFTER_COMA)],
                       [round(false_negative / m, lr_model.ROUND_AFTER_COMA),
                        round(true_negative / m, lr_model.ROUND_AFTER_COMA)]]
             precision = true_positive / (true_positive + false_positive)
@@ -283,7 +285,7 @@ class LogisticRegression:
 
         for e in range(self.epoch):
             coefficients_optimization()
-            if _mod == self.epoch//4:
+            if _mod == self.epoch // 4:
                 _mod = 0
                 print("Iteration {} done".format(e + 1))
             _mod += 1

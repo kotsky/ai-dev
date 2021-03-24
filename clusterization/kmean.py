@@ -12,6 +12,12 @@ Model returns best trained coordinates of centroids after 20 tries
 (with self.centroids) and cost function logs for each iteration(epoch)
 as self.cost_functions
 
+Main methods:
+    * set_data(features) -> set training data
+    * predict() -> return cluster idx which is the most suitable for that new input
+    * fit() -> stores the best trained centroids in .centroids
+    * .number_of_centroids = ? -> set desired number of clusters
+
 """
 
 
@@ -38,11 +44,19 @@ class KMean:
         self._temp_centroids = []
         self._min_max_training_ranges = []
 
+        self._draw_process = False
+
+        # if true, then stores the best centroids per learning
+        # else it has final centroid values after each
+        self._raw_results_return = False
+
+        self._labels = []
+
     def fit(self):
         """Train model"""
         for i in range(self.NUMBER_OF_CENTROIDS_INITIALIZATION):
             self._initialization()
-            self._k_mean_core()
+            self._k_mean_core(i)
 
     def predict(self, new_point_coord: list) -> int:
         """Return the most closest centroid to the given point"""
@@ -54,6 +68,20 @@ class KMean:
                 min_distance = distance
                 closest_centroid = centroid_idx
         return closest_centroid
+
+    def set_labels(self, labels: list) -> None:
+        """Set training data labels"""
+        self._labels = labels
+
+    def set_best_centroids(self, centroids: list) -> None:
+        """Set the best centroids into model"""
+        self._temp_centroids = centroids.copy()
+        self.centroids = centroids.copy()
+        self.number_of_centroids = len(centroids)
+
+    def set_monitor(self, monitor: bool) -> None:
+        """To draw learning process or not"""
+        self._draw_process = monitor
 
     def set_training_data(self, training_data: list) -> None:
         """Set training data set internally"""
@@ -72,18 +100,30 @@ class KMean:
         """
         self.centroid_mode = mode
 
-    def _k_mean_core(self):
+    def _k_mean_core(self, count: int):
         """Core body of K-Mean algorithm"""
 
         cost_function_local = []
         for e in range(self.epoch):
-            plt.clf()
-            self.draw_centroids()
-            self.draw_feature()
+            if self._draw_process:
+                plt.clf()
+                plt.title('K: ' + str(self.number_of_centroids) + ', training N: ' +
+                          str(count+1) + ', iteration: ' + str(e+1))
+                plt.xlabel(self._labels[0])
+                plt.ylabel(self._labels[1])
+                self.draw_centroids()
+                self.draw_feature()
+
             self._assign_centroids_to_point()
+            # plt.clf()
             self._recalc_centroids_coord()
-            self.draw_centroids(label='bo')
-            plt.show()
+
+            if self._draw_process:
+                self.draw_feature(marked=True)
+                self.draw_centroids(marker='b+')
+                plt.legend(loc="best")
+                plt.show()
+
             cost_function_local.append(max(self.get_cost_functions_local()))
 
         # take the best trained centroids by min cost function
@@ -100,7 +140,7 @@ class KMean:
         distance = 0
         for idx in range(len(point_coord)):
             distance += pow(point_coord[idx] - centroid_coord[idx], 2)
-        return round(pow(distance, 0.5), KMean.ROUND_AFTER_COMA)
+        return round(pow(distance, 0.5), self.ROUND_AFTER_COMA)
 
     def _assign_centroids_to_point(self):
         """Define which centroid is closed to each training point and assign it"""
@@ -199,16 +239,32 @@ class KMean:
 
         return cost_function_of_each_centroid_local
 
-    def draw_centroids(self, label='ro'):
+    def draw_centroids(self, marker='r+'):
+        """Draw centroids on 2D plot"""
+        count = 1
         for centroid in self._temp_centroids:
             x, y = centroid[0], centroid[1]
-            plt.plot(x, y, label)
+            label = str(count) + " Centroid before" if marker == 'r+' else str(count) + " Centroid after"
+            plt.plot(x, y, marker, label=label)
+            count += 1
 
-    def draw_feature(self):
-        X = []
-        Y = []
-        for r in range(len(self.training_data)):
-            x, y = self.training_data[r]
-            X.append(x)
-            Y.append(y)
-        plt.scatter(X, Y)
+    def draw_feature(self, marked=False):
+        """Draw 2 features only"""
+        if marked is False:
+            X = []
+            Y = []
+            for r in range(len(self.training_data)):
+                x, y = self.training_data[r]
+                X.append(x)
+                Y.append(y)
+            plt.scatter(X, Y)
+        else:
+            centroids = [[[], []] for x in range(len(self._temp_centroids))]
+            for r in range(len(self.training_data)):
+                x, y = self.training_data[r]
+                centroid_idx = self._point_centroid[r]
+                centroids[centroid_idx][0].append(x)
+                centroids[centroid_idx][1].append(y)
+
+            for centroid in centroids:
+                plt.scatter(centroid[0], centroid[1])

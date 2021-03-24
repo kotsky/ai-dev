@@ -419,7 +419,7 @@ class DataTable:
 
     def plot(self, parameter1=None, parameter2=None,
              features2target=False, all2target=False,
-             classifier=None, additional_to_draw=None) -> None:
+             classifier=None) -> None:
         """
         Plot 2D pictures.
         :param classifier: mark each dot as its class with a color
@@ -457,9 +457,9 @@ class DataTable:
                 else:
                     self._plot2d_helper_with_classifier(parameter1, parameter2, classifier)
 
-        if additional_to_draw is not None:
-            for function in additional_to_draw:
-                function()
+        # if additional_to_draw is not None:
+        #     for function in additional_to_draw:
+        #         function()
 
     def _plot2d_helper_with_classifier(self, parameter1, parameter2, classifier):
         """Draw a picture of 2 features, where data is market per its target class"""

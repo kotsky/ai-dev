@@ -11,7 +11,7 @@ There are:
 - [Regression](https://github.com/kotsky/ai-dev#regression): linear, non-linear, multi-variable.
 - [Logistic Regression](https://github.com/kotsky/ai-dev#logistic-regression)
 - [K-Nearest Neighbors](https://github.com/kotsky/ai-dev#k-nearest-neighbors)
-- K-Mean (ongoing)
+- [K-Mean](https://github.com/kotsky/ai-dev#k-mean)
 - Principal Component Analysis
 
 To support data manipulation, I developed data_reader.py package instead of using pandas libs.
@@ -90,3 +90,28 @@ which gives 72% accuracy, 74% precision and 94% recall.
 Its workflow can be found here: 
 
 https://github.com/kotsky/ai-dev/blob/main/knn_workflow.ipynb
+
+# K-Mean
+1. K-Mean implementation.
+2. About used data.
+3. Results
+
+### K-Mean implementation
+Normal K-Mean algorithm based on distance calculation 
+between centroids and training points. 
+
+### About data
+It's all about customers of some store. So we can 
+try to identify clusters of these customers.
+
+### Results
+With a proper visualization and cost function analyse,
+we find our that the best K is 5 for customers' features Income vs 
+Years of Employed. 
+
+Moreover, we could predict what cluster is the most 
+suitable for a new customer.
+
+Its workflow can be found here:
+
+https://github.com/kotsky/ai-dev/blob/main/kmean_workflow.ipynb
