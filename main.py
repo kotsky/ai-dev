@@ -4,7 +4,8 @@ Follow jupyter notebook workflow for better
 understanding of how to apply data_reader and
 Regression model to train your AI.
 
-Link: https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
+https://kotsky.github.io/projects/ai_from_scratch/regression_workflow.html
+Jupiter notebook: https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
 Package: https://github.com/kotsky/ai-dev/blob/main/regression/regression.py
 
 """
@@ -15,8 +16,11 @@ Follow jupyter notebook workflow for better
 understanding of how to apply data_reader and
 Logistic Regression model to train your AI.
 
-Link: https://github.com/kotsky/ai-dev/blob/main/logistic_regression_workflow.ipynb
+Link: https://kotsky.github.io/projects/ai_from_scratch/logistic_regression_workflow.html
+Jupiter notebook: https://github.com/kotsky/ai-dev/blob/main/logistic_regression_workflow.ipynb
 Package: https://github.com/kotsky/ai-dev/blob/main/classification/logistic_regression.py
+
+https://kotsky.github.io/projects/ai_from_scratch/kmean_workflow.html
 
 """
 
@@ -26,7 +30,8 @@ Follow jupyter notebook workflow for better
 understanding of how to apply data_reader and
 K-Nearest Neighbors model to train your AI.
 
-Link: https://github.com/kotsky/ai-dev/blob/main/knn_workflow.ipynb
+Link: https://kotsky.github.io/projects/ai_from_scratch/knn_workflow.html
+Jupiter notebook: https://github.com/kotsky/ai-dev/blob/main/knn_workflow.ipynb
 Package: https://github.com/kotsky/ai-dev/blob/main/classification/knn.py
 
 """
@@ -37,7 +42,8 @@ Follow jupyter notebook workflow for better
 understanding of how to apply data_reader and
 K-Mean model to train your AI.
 
-Link: https://github.com/kotsky/ai-dev/blob/main/kmean_workflow.ipynb
+Link: https://kotsky.github.io/projects/ai_from_scratch/kmean_workflow.html
+Jupiter notebook: https://github.com/kotsky/ai-dev/blob/main/kmean_workflow.ipynb
 Package: https://github.com/kotsky/ai-dev/blob/main/clusterization/kmean.py
 
 """

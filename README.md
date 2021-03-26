@@ -38,8 +38,7 @@ Trained model shows as little as 3% error of prediction.
 
 Workflow can be found here 
 
-https://github.com/kotsky/ai-dev/blob/main/regression_workflow.ipynb
-
+https://kotsky.github.io/projects/ai_from_scratch/logistic_regression_workflow.html
 # Logistic regression
 1. Logistic regression implementation.
 2. About used data.
@@ -64,7 +63,7 @@ f1 score showed the best logistic threshold at 0.27, which we used to find out t
 
 Workflow can be found here 
 
-https://github.com/kotsky/ai-dev/blob/main/logistic_regression_workflow.ipynb
+https://kotsky.github.io/projects/ai_from_scratch/logistic_regression_workflow.html
 
 78% accuracy was achieved by using standard libs (sklearn). 
 Its workflow can be found here 
@@ -89,7 +88,7 @@ which gives 72% accuracy, 74% precision and 94% recall.
 
 Its workflow can be found here: 
 
-https://github.com/kotsky/ai-dev/blob/main/knn_workflow.ipynb
+https://kotsky.github.io/projects/ai_from_scratch/knn_workflow.html
 
 # K-Mean
 1. K-Mean implementation.
@@ -114,4 +113,4 @@ suitable for a new customer.
 
 Its workflow can be found here:
 
-https://github.com/kotsky/ai-dev/blob/main/kmean_workflow.ipynb
+https://kotsky.github.io/projects/ai_from_scratch/kmean_workflow.html
