@@ -38,7 +38,7 @@ Trained model shows as little as 3% error of prediction.
 
 Workflow can be found here 
 
-https://kotsky.github.io/projects/ai_from_scratch/logistic_regression_workflow.html
+https://kotsky.github.io/projects/ai_from_scratch/regression_workflow.html
 # Logistic regression
 1. Logistic regression implementation.
 2. About used data.
